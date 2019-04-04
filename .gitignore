@@ -58,5 +58,5 @@ venv/
 ENV/
 
 #Data
-data/
 tmp/
+
