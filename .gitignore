@@ -59,4 +59,5 @@ ENV/
 
 #Data
 tmp/
+docs/notes.md
 
