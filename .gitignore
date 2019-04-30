@@ -59,4 +59,7 @@ ENV/
 
 #Data
 tmp/
+docs/notes.md
+notebooks/lukas/
+
 
