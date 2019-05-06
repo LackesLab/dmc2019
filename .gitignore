@@ -61,5 +61,5 @@ ENV/
 tmp/
 docs/notes.md
 notebooks/lukas/
-
+.tmp
 
