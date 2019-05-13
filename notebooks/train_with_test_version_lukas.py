@@ -14,13 +14,19 @@
 
 FINAL_SUBMISSION = False # will perform a test on a validation split if set to False
 
-TEST_BATCH_SIZE = 250 # Number of Test entries to add to the training set for the next iteration
-ITER_PRINT_EVERY = 2 # Which Iterations to print (every nth)
+TEST_BATCH_SIZE = 20000 # Number of Test entries to add to the training set for the next iteration
+ITER_PRINT_EVERY = 5 # Which Iterations to print (every nth)
+
+
+# In[2]:
+
+
+#get_ipython().run_line_magic('run', '../notebooks/utils.ipynb')
 
 
 # ### 2.) import python modules
 
-# In[2]:
+# In[3]:
 
 
 import pandas as pd
@@ -39,8 +45,131 @@ warnings.filterwarnings("ignore")
 
 # ### 3.) define helper functions
 
-# In[3]:
+# In[4]:
+import matplotlib.pyplot as plt
 
+def plot_results_ssl(result_dict):
+    # recall = TP / (TP + FN)
+    # precision = TP / (TP + FP)
+
+    dmc_scores_val = {}
+    #dmc_scores_val = dict.fromkeys(['lin_svg', 'xgboost', 'own_classifier'])
+    dmc_scores_train = {}
+    precision_val = {}
+    precision_train = {}
+    recall_val = {}
+    recall_train = {}
+
+    for iteration_number, elem in enumerate(res):
+        iteration_dict = elem
+        #print("# Iteration: ", iteration_number, "\n# Value: ", iteration_dict)
+        for classifier, results in iteration_dict.items():
+            #print("\t## Classifier: ", classifier, "\n\t## Results: ", results)
+            for set_name, result in results.items():
+                conf_matrix = result['conf_matrix']
+                tp = conf_matrix[0][0]
+                fp = conf_matrix[0][1]
+                fn = conf_matrix[1][0]
+                tn = conf_matrix[1][1]
+
+                recall = tp / (tp + fn)
+                precision = tp / (tp + fp)
+
+                if set_name == "val":
+                    if classifier in dmc_scores_val:
+                        dmc_scores_val[classifier].append(result['dmc_score'])
+                    else:
+                        dmc_scores_val[classifier] = [result['dmc_score']]
+                    if classifier in recall_val:
+                        recall_val[classifier].append(recall)
+                    else:
+                        recall_val[classifier] = [recall]
+                    if classifier in precision_val:
+                        precision_val[classifier].append(precision)
+                    else:
+                        precision_val[classifier] = [precision]
+                else:
+                    if classifier in dmc_scores_train:
+                        dmc_scores_train[classifier].append(result['dmc_score'])
+                    else:
+                        dmc_scores_train[classifier] = [result['dmc_score']]
+                    if classifier in recall_train:
+                        recall_train[classifier].append(recall)
+                    else:
+                        recall_train[classifier] = [recall]
+                    if classifier in precision_train:
+                        precision_train[classifier].append(precision)
+                    else:
+                        precision_train[classifier] = [precision]
+                #print("\t\t### Set: ", set_name, "\n\t\t### Result: ", result)
+                #print("TP: ", tp, "\tFP: ", fp, "\tFN: ", fn, "\tTN: ", tn)
+
+
+
+    plt.figure(num=1, figsize=(7,7))
+    plt.subplot(311)
+    plt.plot(dmc_scores_train['lin_svc'], label='lin_svc', color='r')# Entwicklung der Lin SVC)
+    plt.plot(dmc_scores_train['xgboost'], label='xgboost', color='b')# Entwicklung der Lin SVC)
+    plt.plot(dmc_scores_train['own_classifier'], label='own_classifier', color='g')# Entwicklung der Lin SVC)
+    plt.title('DMC Score on the train set')
+    plt.ylabel('Score')
+    plt.xlabel('Iteration')
+    plt.legend()
+    #plt.show()
+
+    plt.subplot(312)
+    plt.plot(precision_train['lin_svc'], label='lin_svc', color='r')# Entwicklung der Lin SVC)
+    plt.plot(precision_train['xgboost'], label='xgboost', color='b')# Entwicklung der Lin SVC)
+    plt.plot(precision_train['own_classifier'], label='own_classifier', color='g')# Entwicklung der Lin SVC)
+    plt.title('Precision on the train set')
+    plt.ylabel('Precision')
+    plt.xlabel('Iteration')
+    plt.legend()
+    #plt.show()
+
+    plt.subplot(313)
+    plt.plot(recall_train['lin_svc'], label='lin_svc', color='r')# Entwicklung der Lin SVC)
+    plt.plot(recall_train['xgboost'], label='xgboost', color='b')# Entwicklung der Lin SVC)
+    plt.plot(recall_train['own_classifier'], label='own_classifier', color='g')# Entwicklung der Lin SVC)
+    plt.title('Recall on the train set')
+    plt.ylabel('Recall')
+    plt.xlabel('Iteration')
+    plt.legend()
+    plt.subplots_adjust(left=0.0, right=1.0, bottom=2.0, top=3.5)
+    #plt.show()
+
+    plt.figure(2, figsize=(7,7))
+    plt.subplot(311)
+    plt.plot(dmc_scores_val['lin_svc'], label='lin_svc', color='r')# Entwicklung der Lin SVC)
+    plt.plot(dmc_scores_val['xgboost'], label='xgboost', color='b')# Entwicklung der Lin SVC)
+    plt.plot(dmc_scores_val['own_classifier'], label='own_classifier', color='g')# Entwicklung der Lin SVC)
+    plt.title('DMC Score on the val set')
+    plt.ylabel('Score')
+    plt.xlabel('Iteration')
+    plt.legend()
+    #plt.show()
+
+    plt.subplot(312)
+    plt.plot(precision_val['lin_svc'], label='lin_svc', color='r')# Entwicklung der Lin SVC)
+    plt.plot(precision_val['xgboost'], label='xgboost', color='b')# Entwicklung der Lin SVC)
+    plt.plot(precision_val['own_classifier'], label='own_classifier', color='g')# Entwicklung der Lin SVC)
+    plt.title('Precision on the val set')
+    plt.ylabel('Precision')
+    plt.xlabel('Iteration')
+    plt.legend()
+    #plt.show()
+
+    plt.subplot(313)
+    plt.plot(recall_val['lin_svc'], label='lin_svc', color='r')# Entwicklung der Lin SVC)
+    plt.plot(recall_val['xgboost'], label='xgboost', color='b')# Entwicklung der Lin SVC)
+    plt.plot(recall_val['own_classifier'], label='own_classifier', color='g')# Entwicklung der Lin SVC)
+    plt.title('Recall on the val set')
+    plt.ylabel('Recall')
+    plt.xlabel('Iteration')
+    plt.legend()
+
+    plt.subplots_adjust(left=0.0, right=1.0, bottom=2.0, top=3.5)
+    plt.show()
 
 def calc_scores(y_test, y_pred):
     y_test_tmp = y_test.copy()
@@ -52,10 +181,9 @@ def calc_scores(y_test, y_pred):
 def get_classifier(name):
     return {
             'xgb': XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
-                colsample_bytree=1, disable_default_eval_metric=1,
-                eta=0.1769182150877735, eval_metric='aucpr',
+                colsample_bytree=1, disable_default_eval_metric=1,eval_metric='aucpr',
                 gamma=1.8285912697052542, reg_lambda=0.4149772770711012,
-                learning_rate=0.1, max_bin=254, max_delta_step=7.2556696256684035,
+                max_bin=254, max_delta_step=7.2556696256684035,
                 max_depth=3, min_child_weight=1.0317712458399741, missing=None,
                 n_estimators=445, n_jobs=-1, objective='binary:logistic', random_state=0, reg_alpha=0,
                 scale_pos_weight=1,silent=True,
@@ -90,7 +218,7 @@ def get_best_classifier_for_sample(idx, validation_set):
 
 # ### KNN Search Class
 
-# In[4]:
+# In[5]:
 
 
 class KNNLookup():
@@ -117,12 +245,12 @@ class KNNLookup():
 
 # ### 4.) Import Data
 
-# In[5]:
+# In[6]:
 
 
 trainandknn_Xy_original_df = pd.read_csv("../data/train.csv", sep="|") if FINAL_SUBMISSION else pd.read_csv("../data/train_new.csv", sep="|")
-train_Xy_original_df, knn_Xy_original_df = train_test_split(trainandknn_Xy_original_df,train_size=0.75) # if FINAL_SUBMISSION else 0.8**2) #small
-test_X_original_df  = pd.read_csv("../data/test.csv", sep="|") .iloc[0:5000] #TODO: For faster testing we use less data from the test set
+train_Xy_original_df, knn_Xy_original_df = train_test_split(trainandknn_Xy_original_df,train_size=0.75, random_state=42) # if FINAL_SUBMISSION else 0.8**2) #small
+test_X_original_df  = pd.read_csv("../data/test.csv", sep="|").iloc[:21000] #TODO: For faster testing we use less data from the test set
 test_final_X_df = pd.read_csv("../data/test.csv", sep="|")
 
 #Only for test routines
@@ -132,7 +260,7 @@ train_complete_Xy_original_df = pd.read_csv("../data/train.csv", sep="|")
 
 # ### 5.) Prepare Input X and Label Y Data
 
-# In[6]:
+# In[7]:
 
 
 #convention for variables names: datasetname_columntype_transformstatus_dataframeornot
@@ -152,7 +280,7 @@ train_complete_X_originial_df = train_complete_Xy_original_df.copy().drop("fraud
 
 # ### 6.) DataTransformer Class and data transformation
 
-# In[7]:
+# In[8]:
 
 
 class DataTransformer:
@@ -204,7 +332,7 @@ class DataTransformer:
     
 
 
-# In[8]:
+# In[9]:
 
 
 #scaler = MinMaxScaler()
@@ -249,7 +377,7 @@ test_X_scaled_df.head(2)
 
 # ### 5 1/2.) train normally with all available classifiers for classifying knn split
 
-# In[9]:
+# In[10]:
 
 
 knnwithprobs_Xy_df = knn_X_unscaled_df.copy()
@@ -257,7 +385,7 @@ knnwithprobs_Xy_df['fraud'] = knn_y_df
 #TODO: save predict_proba to knnwithprobs_Xy_original_df
 
 
-# In[10]:
+# In[11]:
 
 
 def test_routine(data_dict, data_transformer, knn_lookup):
@@ -336,7 +464,7 @@ def test_routine(data_dict, data_transformer, knn_lookup):
     return results
 
 
-# In[13]:
+# In[12]:
 
 
 def classify_v1(xgboost_fitted, linear_svc_fitted, data_to_predict, data_knn_with_probs, transformer, knn_lookup):
@@ -352,7 +480,7 @@ def classify_v1(xgboost_fitted, linear_svc_fitted, data_to_predict, data_knn_wit
     
     #Check which scaler was used for preprocessing
     if str(type(transformer.scaler)) == "<class 'sklearn.preprocessing.data.StandardScaler'>":
-        tolerance = 1.73
+        tolerance = 1.4
     
     
     for i, row in data_to_predict_unscaled.iterrows():
@@ -421,7 +549,7 @@ def classify_v2(xgboost_fitted, linear_svc_fitted, data_to_predict, data_knn_wit
 
     # Check which scaler was used for preprocessing
     if str(type(transformer.scaler)) == "<class 'sklearn.preprocessing.data.StandardScaler'>":
-        tolerance = 1.73
+        tolerance = 1.5
 
     for i, row in data_to_predict_unscaled.iterrows():
         if row.trustLevel >= 3:
@@ -448,14 +576,10 @@ def classify_v2(xgboost_fitted, linear_svc_fitted, data_to_predict, data_knn_wit
                     prediction.append(xgb_pred)
 
                 # if classification is not equal, take the one with higher probability
-                elif (xgb_pred == 1) and (xgb_prob > 0.71):
+                elif xgb_prob > lsvc_prob:
                     prediction.append(xgb_pred)
-
-                elif (lsvc_pred == 1) and (lsvc_prob > 0.71):
-                    prediction.append(lsvc_pred)
-
                 else:
-                    prediction.append(lsvc_pred | xgb_pred)
+                    prediction.append(lsvc_pred)
 
             # If distance is smaller than 0.15, use knn
             else:
@@ -478,8 +602,7 @@ def classify_v2(xgboost_fitted, linear_svc_fitted, data_to_predict, data_knn_wit
                     prediction.append(0)
                 pred_time.append(pred_end - pred_start)
     return pd.DataFrame({"fraud": prediction})
-
-# In[14]:
+# In[13]:
 
 
 def semi_supervised_learning_procedure(test_X_unscaled, train_X_unscaled, train_y, test_data_dict, transformer):
@@ -511,6 +634,9 @@ def semi_supervised_learning_procedure(test_X_unscaled, train_X_unscaled, train_
     knnwithprob_Xy_unscaled_df['lsvc_predict'] = linear_svc_initial.predict(knnwithprobs_X_scaled_df.values)
     knnwithprob_Xy_unscaled_df['lsvc_proba'] = [round(max(x), 3) for x in
                                         linear_svc_initial.predict_proba(knnwithprobs_X_scaled_df.values)]
+
+
+
     results = []
     for i in range(TEST_BATCH_SIZE, len(test_X_unscaled), TEST_BATCH_SIZE):
         if int(i / TEST_BATCH_SIZE) % ITER_PRINT_EVERY == 0:
@@ -529,7 +655,6 @@ def semi_supervised_learning_procedure(test_X_unscaled, train_X_unscaled, train_
         test_data_dict['pltrain_y_df'] = pltrain_y_df.copy()
 
         linear_svc = get_classifier('svc')
-
         linear_svc.fit(pltrain_X_scaled_df, pltrain_y_df)
 
         xgboost = get_classifier('xgb')
@@ -543,18 +668,20 @@ def semi_supervised_learning_procedure(test_X_unscaled, train_X_unscaled, train_
         knnwithprob_Xy_unscaled_df['lsvc_predict'] = linear_svc.predict(transformer.apply_scaler(knnwithprob_Xy_unscaled_df_tmp))
         knnwithprob_Xy_unscaled_df['lsvc_proba'] = [round(max(x), 3) for x in
                                             linear_svc.predict_proba(transformer.apply_scaler(knnwithprob_Xy_unscaled_df_tmp))]
+        
         test_data_dict['knnwithprob_Xy_unscaled_df'] = knnwithprob_Xy_unscaled_df
         test_data_dict['test_X_unscaled_df'] = pltrain_X_unscaled_df.iloc[train_X_scaled_len:]
         test_data_dict['test_X_scaled_df'] = pltrain_X_scaled_df.iloc[train_X_scaled_len:]
         test_data_dict['test_y_df'] = pltrain_y_df.iloc[train_X_scaled_len:]
         
-        res = test_routine(data_dict, transformer, knn_lookup)
+        res = test_routine(test_data_dict, transformer, knn_lookup)
         
         print("XGBoost: PLTrain auf Val: {} --- PLTest auf Train: {} || LinearSVC:  PLTrain auf Val: {} --- PLTest auf Train: {} || Own Classifier:  PLTrain auf Val: {} --- PLTest auf Train: {}".format(
             res['xgboost']['val']['dmc_score'],res['xgboost']['train']['dmc_score'],res['lin_svc']['val']['dmc_score'],res['lin_svc']['train']['dmc_score'],res['own_classifier']['val']['dmc_score'],res['own_classifier']['train']['dmc_score']))
         
         
         results.append(res)
+        break
 
     """
     # use last few rows that cant fill up a complete batch as a smaller batch
@@ -567,14 +694,14 @@ def semi_supervised_learning_procedure(test_X_unscaled, train_X_unscaled, train_
     
     xgb_final.fit(pltrain_X_unscaled_df.values, pltrain_y_df.values)
     lsvc_final.fit(pltrain_X_scaled_df.values, pltrain_y_df.values)
-    final_prediction = classify_v1(xgb_final, lsvc_final, test_final_X_df.iloc[:10000], data_dict['knnwithprob_Xy_unscaled_df'], transformer, knn_lookup)
+    final_prediction = classify_v1(xgb_final, lsvc_final, test_final_X_df, data_dict['knnwithprob_Xy_unscaled_df'], transformer, knn_lookup)
     return results, final_prediction
 
 
 # ### 6.) iterative model training using pseudo-labeling
 # predict batches of the test set, add them to the previous training set and use this new training set to predict the next batch.
 
-# In[15]:
+# In[14]:
 
 
 def get_extended_pltrain_for_batch(testbatch_X_unscaled_df, pltrain_X_unscaled_df, pltrain_y_df,
@@ -600,7 +727,7 @@ def get_extended_pltrain_for_batch(testbatch_X_unscaled_df, pltrain_X_unscaled_d
     
 
 
-# In[19]:
+# In[15]:
 
 
 data_dict = dict()
@@ -616,36 +743,20 @@ data_dict['val_y_df'] = val_y_df.copy()
 res, fin_pred = semi_supervised_learning_procedure(test_X_unscaled_df, train_X_unscaled_df, train_y_df, data_dict, transformer)
 
 
-# In[20]:
+# In[16]:
 
 
 train_complete_X_unscaled_df.copy().describe()
 
 
-# In[21]:
+# In[17]:
 
 
 fin_pred.describe()
 
 
-# In[ ]:
+# In[18]:
 
 
+plot_results_ssl(res)
 
-
-
-# ### 7.) pseudo-label the test set and create new classifier based on this
-# first we predict the original test data labels using the new extended pltrain from above cell and second we use this test data labels to train a new classifier
-
-# ### 8.) evaluate our new classifier with the original training set
-
-# ### 9.) combine the pseudo labeled test set with the original train data to train our final classifier
-
-# ### 10.) predict labels for the test set using our final classifier
-
-# ### 11.) generate output file neeeded for submission
-
-# ### 12.) evaluate our new classifier with the validation set
-# Now at the very end we can also test our final model on a validation split never used before. just for comparison. 
-# 
-# **For the final submission, the following code should will not be run and the full train (incl. this val split) set will be used above**
