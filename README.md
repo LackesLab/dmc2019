@@ -21,6 +21,7 @@
       - [Keras](#keras)
       - [Seaborn](#seaborn)
   - [Datenset](#datenset)
+  - [Ablauf](#ablauf)
     - [Features](#features)
     - [Trainings- Validierungs und Testdaten](#trainings--validierungs-und-testdaten)
   - [Feature Engineering](#feature-engineering)
@@ -30,10 +31,14 @@
   - [Modelle](#modelle)
     - [Baseline](#baseline)
       - [XGBoost Klassifikator](#xgboost-klassifikator)
-      - [Linear Support Vector Machine](#linear-support-vector-machine)
-    - [Semi-Supervised Learning](#semi-supervised-learning)
+      - [Die Kostenfunktion](#die-kostenfunktion)
+      - [Lineare Support Vector Machine](#lineare-support-vector-machine)
+    - [Boosting durch Kombinieren der beiden Baseline Klassifikatoren](#boosting-durch-kombinieren-der-beiden-baseline-klassifikatoren)
+    - [Semi-Supervised Learning (SSL)](#semi-supervised-learning-ssl)
+    - [Finaler Klassifikator](#finaler-klassifikator)
   - [Weitere Verbesserungsmöglichkeiten](#weitere-verbesserungsm%c3%b6glichkeiten)
   - [Zusammenfassung](#zusammenfassung)
+  
 ## Allgmein
 
 Der Data Mining Cup fand im Jahr 2019 bereits das 20. Mal statt und hat sich in den vergangenen Jahren zu Dem Wettbewerb im Bereich Data Mining und Machine Learning entwickelt. Veranstalter des Wettbewerbs ist die Prudysy AG. 150 Teams aus über 28 Ländern bearbeiteten eine Aufgabe aus dem Bereich Fraud-Detection im Retail Sektor. Für das Lösen der Aufgabe hatten die Teams nach der Bekanntgabe der Aufgabe 6 Wochen Zeit, bis die Ergebnisse eingereicht werden müssen. Das Team der Hochschule Karlsruhe schaffte es im ersten Teilnahme-Jahr direkt unter die Top10 Teams der Welt und war mit dem 6. Platz das beste Team aus Süddeutschland. Lediglich die Teams der Hochschule Anhalt(4. Platz) sowie der TU Chemnitz (5. Platz) konnten als deutsche Teams noch vor den Karlsruhern landen.
@@ -76,6 +81,28 @@ Für die Umsetzung der Basisklassifikatoren (Siehe Kapitel [Models](#Models)) wu
 
 Für die Bearbeitung des Datensets standen 1879 annotierte Trainingssamples sowie 498.121 nicht annotierten Testsamples zur Verfügung ein Trainings- und ein Testdatenset zur Verfügung.
 Für die spätere Vewenundung des Datensets mit verschiedenen Klassifikatoren wurden die Daten zusätzlich in einer skalierten Version abgespeichert. Skaliert wurde mithilfe des [Standard Scalers von Scikit-Learn](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html) anhand des Mittelwerts und der Varianz.
+
+## Ablauf
+Dieses Kapitel soll eine grobe übersicht über den Ablauf, vom Feature Engineering bis hin zum fertigen Klassifikator geben. Für Details sollte ein Blick in das jeweilige Kapitel geworfen werden. Am Ende des Kapitels ist ein Diagramm abegbildet, das den Ablauf des Findens des finalen Klassifikators visualisiert.
+
+1. Testen verschiedener Standardklassifikatoren
+   1. Um ein Gefühl für die Daten zu bekommen, wurden die heute gängigen Klassifikatoren aus der Bibliothek Scikit-Learn genutzt um Fehler auf einem festen Train/Val-Split zu predicten. Hierbei lieferten  das Gradienten-Boosting Verfahren *AdaBoost* (später ersetzt durch *XGBoost*) und eine Support Vector Machine mit linearem Kernel die besten Ergebnisse.
+    
+2. Plotten von Verteilungen und Korrelationen der Features
+   1. Mithilfe der Python Bilbiotheken Seaborn und Matplotlib wurden Verteilungen und Korrelationen geplottet. Insbesondere wurden die Verteilungen für die Zielvariable *Fraud* denen von *Non Fraud* gegenübergestellt, um so schon frühzeitige trennungswirksame Variablen zu finden.
+3. Erstellen und auswerten von neuen Features
+   1. Im Fall des Data Mining Cup Datensets basierten die Features meisten auf Zeiteinheiten oder Mengen, wodurch einfach neue Features durch Kombination der alten erstellt werden können. So wurde auch das Feature *totalScannedLineItems* erzeugt.
+4. Auf Basis von Punkt 1 Basisklassifikatoren bestellen
+   1. Aus den in Punkt 1 erwähnten Klassifikatoren wurden 2 Basisklassifikatoren ausgewählt. Diese dienten während des weiteren Entwicklungsprozesses als Maßstab für neue entwickelte Anätze. Während in Punkt 1 hauptsächlich die Default Parameter für die Klassifikatoren eingesetzten wurden, wurde nun mithilfe einer automatisierten Hyperparamtersuche die am besten geeigneten Parameter gesucht.
+5. Aufteilen der vorhandenen Daten in Trainings-, Validierungs- und Testdaten
+   1. In einem späteren Teil des Entwicklungsprozesses kamen Techniken wie das Semi-Supervised Learning zum Einsatz. Um auch hier die Ergebnisse quantisieren zu können haben wir uns für einen frühen Split der Trainingsdaten entschieden. So wurde das ursprüngliche Trainingsset in Trainingsdaten (60%), Validierungsdaten (20%) und Testdaten(20%) aufgeteilt. Je nach Entwicklungsschritt musste/konnte diese Aufteilung auch einmal verworfen werden, um mehr Trainingsdaten nutzen zu können.
+6. 
+
+
+
+
+![Ablauf des Finalen Klassifikators](images/../notebooks/diagram.svg)
+
 
 ### Features
 
@@ -145,7 +172,7 @@ Viele der State-of-the-Art Klassifikatoren arbeiten direkt oder indirekt mit der
 
 #### Besonderheiten
 
-je weiter das Projekt fortgeschritten war, fiel auf, dass wir es hier mit einem extrem variablen Datenset zu tun haben. Dies trat besonders bei den Cross-Validation Tests zum vorschein. Eine 5-fold CV führte bei 10 Ausführungen mit "Shuffle" zu 10 teilweise sehr unterschiedlichen Ergebnissen. So konnten zwar während der Hyperparametersuche immer wieder DMC-Scores von 60,70 oder sogar 90 beobachtet werden, jedoch war dies nur auf eine "günstige" Konstellation der Trainings- und Validierungsdaten zurückzuführen. Diese hohe Varianz in den Trainingsdaten bereitete so große Schwierigkeiten, dass entschieden wurde nicht den Klassifikator mit dem besten Ergebnis auf einzelne Score-Werte zu suchen, sondern mithilfe eigens entwickelter Validierungsfunktionen den robustesten Klassifikator zu wählen.
+Je weiter das Projekt fortgeschritten war, fiel auf, dass wir es hier mit einem extrem variablen Datenset zu tun haben. Dies trat besonders bei den Cross-Validation Tests zum vorschein. Eine 5-fold CV führte bei 10 Ausführungen mit "Shuffle" zu 10 teilweise sehr unterschiedlichen Ergebnissen. So konnten zwar während der Hyperparametersuche immer wieder DMC-Scores von 60,70 oder sogar 90 beobachtet werden, jedoch war dies nur auf eine "günstige" Konstellation der Trainings- und Validierungsdaten zurückzuführen. Diese hohe Varianz in den Trainingsdaten bereitete so große Schwierigkeiten, dass entschieden wurde nicht den Klassifikator mit dem besten Ergebnis auf einzelne Score-Werte zu suchen, sondern mithilfe eigens entwickelter Validierungsfunktionen den robustesten Klassifikator zu wählen.
 
 
 ## Modelle
@@ -231,9 +258,14 @@ XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
     tree_method='gpu_hist', verbosity=2)
 
 ```
+
 Die Hyperparametersuche führte zu minimal besseren Klassifikationsergebnissen, sodass im Mittel ein DMC Score von **42.0** erreicht werden konnte.
 
-#### Linear Support Vector Machine
+#### Die Kostenfunktion
+
+Bei Gradientenboostingverfahren wird für die Berechnung des Gradienten eine 2-fach stetig differenzierbare mathematische Funktion benötigt (positive Definitheit). In vielen Fällen ist es möglich diese über eine Approximation zu erhalten. Aufgrund des Zeitmangels war es uns aber nicht möglich unsere Kostenfunktion (vorgestellt im Abschnitt [Metrik](#metrik)) in eine 2 fach stetig differenzierbare zu wandeln. Da die XGBoost Bibliothek aber als Kostenfunktion eine $F_\beta$-Funktion anbietet und sich über diese eine *imbalance* zwischen Precision und Recall ausrücken lässt, wurde über ein iteratives Verfahren das $\beta$ gesucht, für das die $F_\beta$-Funktion die größte Korellation mit dem DMC-Score aus dem Kapitel [Metrik](#metrik) aufweist. $\beta = 0.5172413$ weist die größte Korrelation mit dem DMC Score auf.
+
+#### Lineare Support Vector Machine
 Wie erste Tests zeigten, performt eine Support Vector Machine mit linearem Kernel besonders gut auf dem Datensatz des Data Mining Cups. Aus diesem Grund wurde die Scikit-Learn Implementierung des Support Vector Classifiers [*sklearn.svm.SVC*](!https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn-svm-svc) verwendet. Hierbei wurde als Kernel der lineare Kernel. Statt der bereits vorhandenen Klasse *linearSVC* wurde auf die Basisimplementierung `SVC(kernel='linear')` zurückgegriffen, da diese mehe möglichkeiten hinsichtlich Paralellisierung sowie Verwendung modifizierter Funktionen bietet. Da Support Vector Machines deutlich besser auf skalierten Daten arbeiten, wurde das ursprüngliche Datenset anhand des Mittelwerts und der Varianz skaliert. Dass SVM skalierungssensitiv sind, ist besonders gut an folgendem Beispiel zu erkennen:
 
 ![Skalierungssensitive SVM](images/unscaled_scaled_SVM.png)<br>
@@ -292,8 +324,84 @@ SVC(C=11.439334564226868, cache_size=8000, class_weight=None, coef0=0.0,
     shrinking=False, tol=0.08370638742373739, verbose=0)
 ```
 
-### Semi-Supervised Learning
-## Weitere Verbesserungsmöglichkeiten
+### Boosting durch Kombinieren der beiden Baseline Klassifikatoren
 
+Im Vergleich zu den in [Modelle](#modelle) erreichten Werten bringen sowohl SVM als auch XGBoost passable Ergebnisse. Ein näheres Betrachten der *False Positives*, welche mit einem Gewicht von -25 in den DMC Score einfließen, zeigt, dass SVM und XGB unterschiedliche Fehler machen. Basierend auf dieser Beoabachtung soll ein neuer Klassifikator aus einer Kombination der beiden Basisklassifikatoren entscheiden. Diese Technik ist auch als [Boosting](!https://en.wikipedia.org/wiki/Boosting_(machine_learning)) bekannt. Für diesen Zweck wurde ein One-Layer neuronales Netz verwendet.
+
+Als Eingabe für das Netz dienten die "Prediction" sowie die "Confidence" (Prediction Probability) der beiden Basis Klassifikatoren. Zwischen Ein- und Ausgabeschicht wurde eine versteckte Schicht mit 15 Neuronen eingefügt. Versuche haben gezeigt, dass mehr Neuronen nicht zielführend sind und zu einem Overfitting führen, weniger jedoch die Komplexität nicht abdecken können. Das One-Layer ist in folgendem Bild zu sehen:
+
+![One-Layer Netz](images/one_layer.png) <br>
+<sub>Abb. X: Input: *prediction* und *probability_prediction* beider Basisklassifikatoren --- Output: 0 oder 1 (fraud prediction) </sub>
+
+Das Netz wurde mithilfe von Keras implementiert. Die Implementierung ist im Folgenden zu sehen:
+
+``` python
+from keras.models import Sequential
+from keras.layers import Dense, Activation
+from keras_metrics import binary_average_recall, binary_recall, binary_precision
+
+model = Sequential()
+model.add(Dense(15, input_shape=(4,),activation='relu'))
+model.add(Dense(1,activation='sigmoid'))
+model.compile(optimizer ='adam',loss='binary_crossentropy', metrics =['accuracy',binary_precision(), binary_recall(), binary_average_recall()])
+
+
+model.summary()
+_________________________________________________________________
+Layer (type)                 Output Shape              Param #   
+=================================================================
+dense_1 (Dense)              (None, 15)                75        
+_________________________________________________________________
+dense_2 (Dense)              (None, 1)                 16        
+=================================================================
+Total params: 91
+Trainable params: 91
+Non-trainable params: 0
+_________________________________________________________________
+```
+
+Als Optimierer wurde ein *Adam-Optimierer* und als Kostenfunktion die *binary crossentropy* verwendet. Als zusätzliche Metriken kamen *precision*, *recall* und der *binary average recall* zum Einsatz.
+
+Um ausreichend Trainingsdaten für das neuronale Netz zu haben sollten die beiden Basisklassifikatoren miithilfe einer cross validation Funktion den annotierten Trainingsdatensatz vorhersagen. Aufgrund der Tatsache, dass das Netz lediglich die Ergebnisse und dessen Wahrscheinlichkeit von SVM und XGBoost als Eingabe erhält, nicht aber die eigentlichen Datensamples, ist diese Vorgehensweise aus unserer Sicht unbedenklich.
+
+### Semi-Supervised Learning (SSL)
+
+Semi-Supervised Learning ist ein Teilgebiet des maschinellen Lernens, bei dem Versucht wird supervised und unsupervised Ansätze zu kombinieren. Dabei können sowohl unsupervised Ansätze durch supervised Ansätze ergänzt werden, als auch umgekehrt. Diese Techniken  können besonders bei Problemen helfen, bei denen extrem unbalancierte Datensets vorhanden sind oder, wie im Fall des Data Mining Cups, nur sehr wenige Trainingsdaten vorhanden sind.
+
+Grundlagen sowie einzelne Konzepte, auf die während des Wettbewerbs zurückgegriffen wurden stammen aus dem Buch ["Semi-Supervised Learning"](!http://www.acad.bg/ebook/ml/MITPress-%20SemiSupervised%20Learning.pdf) von Chapell, Schölkopf und Zien.
+
+Um weitere Trainingsdaten zu erhalten, wurde eine Methode mit dem Namen "Pseudo Labeling" gewählt. Hierbei wird ein bereits trainierter Klassifikator, der bereits gute Ergebnisse liefert, genutzt um einen Teil des Testdatensets vorherzusagen.
+
+Speziell die Support Vector Machine könnte hiervon profitieren. In der Theorie versuchen SVMs ihre Entscheidungsgerade in einen dünn besetzten Bereich der Daten zu legen. Ist allerdings ein Trainingsdatensatz nicht repräsentativ für die Gesamtheit der Daten, so könnten Datenlücken für diese dünn besetzten Bereiche sorgen. Nimmt man nun Samples aus dem Testdatensatz hinzu, so kann dies dazu führen, dass diese Bereiche besetzt werden. Folglich profitiert die SVM davon, da einer falschen Entscheidungsgerade entgegengewirkt wird.
+
+Es gilt aber zu beachten, dass die hinzugezogenen Testdaten nur einen Anteil zwischen 20% und 30% ausmachen dürfen. Dies besagen nicht nur die Erfahrungsberichte anderer Entwickler sondern wurde ebenfalls durch eigens durchgeführte Tests gezeigt. Wir konnten die beste Anzahl hinzugenommener Samples ermitteln in dem wir aktiv Pseudo-Labeling einsetzten und mithilfe mehrerer Cross Validations den durschnittlichen Score ermittelten. In der Abbildung X sind die verschiedenen Ergebnisse des Pseudo Lablings zu sehen. Auf der Y-Achse ist der erreichte DMC Score zu sehen, die X-Achse zeigt die Anzahl der fürs PL verwendete Testsamples. Der Plot für 500 Testsamples (braun) weist, in Verbindung von Median und Varianz, die besten Werte auf. Dies entspricht ca. 25% der gesamten Trainingsdaten (1879 + 500).
+
+![Pseudo Labeling](images/ssl_validation.PNG) <br>
+<sub>Abb. X: Box Plot für durchgeführtes Semi-Supervised Learning in mehreren Cross Validations </sub>
+
+Auf den ersten Blick konnte das SSL für keine große Verbesserung des DMC Scores auf unserem separierten Testset sorgen. Wir konnten aber mithilfe der selbst geschriebenen Cross Validation Funktion zeigen, dass sich die Robustheit gegnüber Ausreißern erhöht. Dies ist vorallem deshalb wichtig, weil uns False Positives, also Fälle die Non-Fraud sind aber als Fraud klassifiziert werden, stärker bestraft werden als uns True Positives "belohnen".  
+
+### Finaler Klassifikator
+Für den finalen Klassifikator kommen nun alle bisher beschriebenen Komponenten und Aspekte zum Einsatz. Insbesondere kommt der Aspekt zum Tragen, dass es keine Frauds mit *TrustLevel* > 2 gibt. Der PseudoCode für den Klassifikator ist im folgenden zu sehen, gefolgt von einer grafischen Darstellung dessen.
+
+``` python
+if trustLevel > 2:
+  return nonFraud
+
+else:
+  xgb_prediction, xgb_confidence = xgboost.predict(data_dample)
+  svm_prediction, svm_confidence = svm.predict(data_sample)
+
+  final_prediction = shallow_neural_net.predict(xgb_prediction, xgb_confidence, svm_prediction, svm_confidence)
+
+  if final_prediction == 0:
+    return nonFraud
+
+  else:
+    return Fraud
+```
+![Final Classifier](images/final_classifier_green.png)
+
+## Weitere Verbesserungsmöglichkeiten
 
 ## Zusammenfassung
