@@ -37,7 +37,8 @@
     - [Semi-Supervised Learning (SSL)](#semi-supervised-learning-ssl)
     - [Finaler Klassifikator](#finaler-klassifikator)
   - [Weitere Verbesserungsmöglichkeiten](#weitere-verbesserungsm%c3%b6glichkeiten)
-  - [Zusammenfassung](#zusammenfassung)
+    - [Retraining des Boosting netzes während dem Semisupervised Learning](#retraining-des-boosting-netzes-w%c3%a4hrend-dem-semisupervised-learning)
+    - [Automatisches Feature Engineering (Mehrere Kombinationen verschiedener Features)](#automatisches-feature-engineering-mehrere-kombinationen-verschiedener-features)
   
 ## Allgmein
 
@@ -86,17 +87,31 @@ Für die spätere Vewenundung des Datensets mit verschiedenen Klassifikatoren wu
 Dieses Kapitel soll eine grobe übersicht über den Ablauf, vom Feature Engineering bis hin zum fertigen Klassifikator geben. Für Details sollte ein Blick in das jeweilige Kapitel geworfen werden. Am Ende des Kapitels ist ein Diagramm abegbildet, das den Ablauf des Findens des finalen Klassifikators visualisiert.
 
 1. Testen verschiedener Standardklassifikatoren
-   1. Um ein Gefühl für die Daten zu bekommen, wurden die heute gängigen Klassifikatoren aus der Bibliothek Scikit-Learn genutzt um Fehler auf einem festen Train/Val-Split zu predicten. Hierbei lieferten  das Gradienten-Boosting Verfahren *AdaBoost* (später ersetzt durch *XGBoost*) und eine Support Vector Machine mit linearem Kernel die besten Ergebnisse.
+   - Um ein Gefühl für die Daten zu bekommen, wurden die heute gängigen Klassifikatoren aus der Bibliothek Scikit-Learn genutzt um Fehler auf einem festen Train/Val-Split zu predicten. Hierbei lieferten  das Gradienten-Boosting Verfahren *AdaBoost* (später ersetzt durch *XGBoost*) und eine Support Vector Machine mit linearem Kernel die besten Ergebnisse.
     
 2. Plotten von Verteilungen und Korrelationen der Features
-   1. Mithilfe der Python Bilbiotheken Seaborn und Matplotlib wurden Verteilungen und Korrelationen geplottet. Insbesondere wurden die Verteilungen für die Zielvariable *Fraud* denen von *Non Fraud* gegenübergestellt, um so schon frühzeitige trennungswirksame Variablen zu finden.
+   - Mithilfe der Python Bilbiotheken Seaborn und Matplotlib wurden Verteilungen und Korrelationen geplottet. Insbesondere wurden die Verteilungen für die Zielvariable *Fraud* denen von *Non Fraud* gegenübergestellt, um so schon frühzeitige trennungswirksame Variablen zu finden.
 3. Erstellen und auswerten von neuen Features
-   1. Im Fall des Data Mining Cup Datensets basierten die Features meisten auf Zeiteinheiten oder Mengen, wodurch einfach neue Features durch Kombination der alten erstellt werden können. So wurde auch das Feature *totalScannedLineItems* erzeugt.
-4. Auf Basis von Punkt 1 Basisklassifikatoren bestellen
-   1. Aus den in Punkt 1 erwähnten Klassifikatoren wurden 2 Basisklassifikatoren ausgewählt. Diese dienten während des weiteren Entwicklungsprozesses als Maßstab für neue entwickelte Anätze. Während in Punkt 1 hauptsächlich die Default Parameter für die Klassifikatoren eingesetzten wurden, wurde nun mithilfe einer automatisierten Hyperparamtersuche die am besten geeigneten Parameter gesucht.
+   - Im Fall des Data Mining Cup Datensets basierten die Features meisten auf Zeiteinheiten oder Mengen, wodurch einfach neue Features durch Kombination der alten erstellt werden können. So wurde auch das Feature *totalScannedLineItems* erzeugt.
+4. Auf Basis von Punkt 1 Basisklassifikatoren bestimmen
+   - Aus den in Punkt 1 erwähnten Klassifikatoren wurden 2 Basisklassifikatoren ausgewählt. Diese dienten während des weiteren Entwicklungsprozesses als Maßstab für neue entwickelte Anätze. Während in Punkt 1 hauptsächlich die Default Parameter für die Klassifikatoren eingesetzten wurden, wurde nun mithilfe einer automatisierten Hyperparamtersuche die am besten geeigneten Parameter gesucht.
 5. Aufteilen der vorhandenen Daten in Trainings-, Validierungs- und Testdaten
-   1. In einem späteren Teil des Entwicklungsprozesses kamen Techniken wie das Semi-Supervised Learning zum Einsatz. Um auch hier die Ergebnisse quantisieren zu können haben wir uns für einen frühen Split der Trainingsdaten entschieden. So wurde das ursprüngliche Trainingsset in Trainingsdaten (60%), Validierungsdaten (20%) und Testdaten(20%) aufgeteilt. Je nach Entwicklungsschritt musste/konnte diese Aufteilung auch einmal verworfen werden, um mehr Trainingsdaten nutzen zu können.
-6. 
+   - In einem späteren Teil des Entwicklungsprozesses kamen Techniken wie das Semi-Supervised Learning zum Einsatz. Um auch hier die Ergebnisse quantisieren zu können haben wir uns für einen frühen Split der Trainingsdaten entschieden. So wurde das ursprüngliche Trainingsset in Trainingsdaten (60%), Validierungsdaten (20%) und Testdaten(20%) aufgeteilt. Je nach Entwicklungsschritt musste/konnte diese Aufteilung auch wieder verworfen werden, um mehr Trainingsdaten nutzen zu können.
+  
+6. Verbessern der Basisklassifikatoren
+   1. Nachdem auch nach dem Finetuning anderer, in Punkt 1 verwendeter, Klassifikatoren keine besseren Ergebnisse erzielt wurden, sollten die lineare SVM und der Gradient-Boosting Algorithmus weiter vorangetrieben werden.
+   2. Die Eingabedaten der SVM wurden skaliert --> SVM profitiert hiervon
+   3. AdaBoost Algorithmus wurde durch XGBoost augetauscht --> Mehr Finetuningmöglichkeiten. Beim XGBoost Algorithmus können eigene Kostenfunktionen genutzt werden, die allerdings strenge Gegebenheiten erfüllen müssen. Aus diesem Grund wurde ein an den DMC Score approximierten $F_\beta$-Score genutzt um das gewünschte Ergebnis zu erreichen. XGB arbeitet auch weiterhin mit unskalierten Daten. Tests haben gezeigt, dass skalierte Daten sich hier negativ auswirken können.
+
+7. Semi-Supervised Learning: Pseudo-Labeling
+   1. Aufgrund des Größenunterschieds zwischen Trainings- (1879) und Testdatenset(~500k) wurden verschiedene Semi-Supervised Ansätze in Erwägung gezogen. Hierbei stellte sich das Pseudo-Labeling als besonders gut einsetzbar heraus. Mithilfe einer eigens definierten Cross-Validation Funktion hat man sich für die Hinzunahme von 500 Testsamples zum Trainingsdatensatz entschieden.
+
+8. Boosting Verfahren durch Kombination der beiden Basisklassifikatoren.
+   1. Eine nähere Betrachtung der falsch klassifizierten Validierungs-Samples hat gezeigt, dass SVM und XGBoost unterschiedliche Samples falsch klassifizieren. Dies führte zu dem Entschluss die beiden Klassifikatoren zu kombinieren. Eine Manuelle Kombination mit einfacher if-else Logik und der *Prediction Probability* konnte nicht überzeugen. Aus diesem Grund wurde ein einfaches Perzeptron genutzt, welches die korrekte Klassifikation gelernt und erfolgreich durchgeführt hat.
+
+9. Finale Klassifikation und Validierung der Ergebnisse
+   1. Durch Kombination von Semi-Supervised Learning, dem Boosting Verfahren sowie Erkenntnissen aus dem Feature Engineering wurde der finale Klassifikator gebaut um mit ihm die 500.000 Testdaten vorherzusagen. Eine Validierung konnte anhand der Verteilung der Variablen überprüft werden. Da der Anteil der *Frauds* im Testdatensatz ebenfalls ca. 5% betrug, sprach dies für ein vernünftiges Ergebnis. Auch die Verteilungskurven der anderen Variablen stimmten Größtenteil mit denen des Trainingsdatensatzes überein.
+
 
 
 
@@ -402,6 +417,17 @@ else:
 ```
 ![Final Classifier](images/final_classifier_green.png)
 
+Im Vergleich zu den verwendeten Basisklassifikatoren konnte keine große Verbesserung des DMC Scores erreicht werden. Die beim Transfer Learning beobachteten hohen Schwankungen des DMC Scores konnte aber verringert werden. Dies ist ein Indikator für ein robusteres Modell und auf jedenfall eine wichtige Eigenschaft eines guten Klassifikators.
+
 ## Weitere Verbesserungsmöglichkeiten
 
-## Zusammenfassung
+Drr enorme Zeitdruck hatte leider keinen Spielraum für das Ausprobieren mehrerer Ansätze gelassen. Ein paar Ideen, die noch aufkamen sind in diesem Kapitel kurz erläutert.
+
+### Retraining des Boosting netzes während dem Semisupervised Learning
+
+Mithilfe eines On-Layer Netzes konnte die Klassifikation in Fraud/Non-Fraud noch einmal hinsichtlich der Robustheit und der Genauigkeit verbessert werden. Aufgrund der Tatsache, dass die Scores der anderen Teams nur minimal besser waren, könnte ein Einbetten eines Trainings des neuronalen Netzes in den Semi-Supervised Ansatz zu einer minimalen Verbesserung führen. Dies wäre auch deshalb wichtig, da sich die zwei Basisklassifikatoren durch das Semisupervised Learning verändert haben.
+
+### Automatisches Feature Engineering (Mehrere Kombinationen verschiedener Features)
+
+Viele der bei der Preisverleihung anwesenden Teams benutzen statt dem manuellen Feature Engineering, Frameworks zur automatischen Feature Generierung. Da wir selbst leider diesen Ansatz nicht ausprobieren konnten, wäre dies eine Möglichkeit, unsere Prediction weiter zu verbessern. Speziell weil sich gezeigt hat, dass ein neu erarbeitetes Feature (totalScannedLineItems) sich als sehr Trennungswirksam herausstellte.
+
