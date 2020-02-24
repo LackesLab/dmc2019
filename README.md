@@ -1,43 +1,45 @@
 # DATA MINING CUP 2019
 
 - [DATA MINING CUP 2019](#data-mining-cup-2019)
-  - [Allgmein](#allgmein)
-    - [Task](#task)
-    - [Metrik](#metrik)
-    - [Umsetzung](#umsetzung)
-      - [Pandas](#pandas)
-      - [Scikit-Learn](#scikit-learn)
-      - [Keras](#keras)
-      - [Seaborn](#seaborn)
-  - [Datenset](#datenset)
-  - [Ablauf](#ablauf)
-    - [Features](#features)
-    - [Trainings- Validierungs und Testdaten](#trainings--validierungs-und-testdaten)
-  - [Feature Engineering](#feature-engineering)
-    - [Validieren eines neuen Merkmals](#validieren-eines-neuen-merkmals)
-      - [Verteilungs Plots und Korrelation zwischen Zielvariable und neuem Feature](#verteilungs-plots-und-korrelation-zwischen-zielvariable-und-neuem-feature)
-      - [Besonderheiten](#besonderheiten)
-  - [Modelle](#modelle)
-    - [Baseline](#baseline)
-      - [XGBoost Klassifikator](#xgboost-klassifikator)
-      - [Die Kostenfunktion](#die-kostenfunktion)
-      - [Lineare Support Vector Machine](#lineare-support-vector-machine)
-    - [Boosting durch Kombinieren der beiden Baseline Klassifikatoren](#boosting-durch-kombinieren-der-beiden-baseline-klassifikatoren)
-    - [Semi-Supervised Learning (SSL)](#semi-supervised-learning-ssl)
-    - [Finaler Klassifikator](#finaler-klassifikator)
-  - [Weitere Verbesserungsmöglichkeiten](#weitere-verbesserungsm%c3%b6glichkeiten)
-    - [Retraining des Boosting netzes während dem Semisupervised Learning](#retraining-des-boosting-netzes-w%c3%a4hrend-dem-semisupervised-learning)
-    - [Automatisches Feature Engineering (Mehrere Kombinationen verschiedener Features)](#automatisches-feature-engineering-mehrere-kombinationen-verschiedener-features)
-  
-## Allgmein
+- [Allgmein](#allgmein)
+  - [Task](#task)
+  - [Metrik](#metrik)
+  - [Umsetzung](#umsetzung)
+    - [Pandas](#pandas)
+    - [Scikit-Learn](#scikit-learn)
+    - [Keras](#keras)
+    - [Seaborn](#seaborn)
+- [Datenset](#datenset)
+- [Ablauf](#ablauf)
+  - [Features](#features)
+  - [Trainings- Validierungs und Testdaten](#trainings--validierungs-und-testdaten)
+- [Feature Engineering](#feature-engineering)
+  - [Validieren eines neuen Merkmals](#validieren-eines-neuen-merkmals)
+    - [Verteilungs Plots und Korrelation zwischen Zielvariable und neuem Feature](#verteilungs-plots-und-korrelation-zwischen-zielvariable-und-neuem-feature)
+    - [Besonderheiten](#besonderheiten)
+- [Modelle](#modelle)
+  - [Baseline](#baseline)
+    - [XGBoost Klassifikator](#xgboost-klassifikator)
+    - [Die Kostenfunktion](#die-kostenfunktion)
+    - [Lineare Support Vector Machine](#lineare-support-vector-machine)
+  - [Boosting durch Kombinieren der beiden Baseline Klassifikatoren](#boosting-durch-kombinieren-der-beiden-baseline-klassifikatoren)
+  - [Semi-Supervised Learning (SSL)](#semi-supervised-learning-ssl)
+  - [Finaler Klassifikator](#finaler-klassifikator)
+- [Weitere Verbesserungsmöglichkeiten](#weitere-verbesserungsm%c3%b6glichkeiten)
+  - [Retraining des Boosting netzes während dem Semisupervised Learning](#retraining-des-boosting-netzes-w%c3%a4hrend-dem-semisupervised-learning)
+  - [Automatisches Feature Engineering (Mehrere Kombinationen verschiedener Features)](#automatisches-feature-engineering-mehrere-kombinationen-verschiedener-features)
+- [Das Repository](#das-repository)
+
+
+# Allgmein
 
 Der Data Mining Cup fand im Jahr 2019 bereits das 20. Mal statt und hat sich in den vergangenen Jahren zu Dem Wettbewerb im Bereich Data Mining und Machine Learning entwickelt. Veranstalter des Wettbewerbs ist die Prudysy AG. 150 Teams aus über 28 Ländern bearbeiteten eine Aufgabe aus dem Bereich Fraud-Detection im Retail Sektor. Für das Lösen der Aufgabe hatten die Teams nach der Bekanntgabe der Aufgabe 6 Wochen Zeit, bis die Ergebnisse eingereicht werden müssen. Das Team der Hochschule Karlsruhe schaffte es im ersten Teilnahme-Jahr direkt unter die Top10 Teams der Welt und war mit dem 6. Platz das beste Team aus Süddeutschland. Lediglich die Teams der Hochschule Anhalt(4. Platz) sowie der TU Chemnitz (5. Platz) konnten als deutsche Teams noch vor den Karlsruhern landen.
 
-### Task
+## Task
 
 Die Jubiläumsausgabe des internationalen Studentenwettbewerbs hatte zum Ziel, Betrugsfälle beim mobilen Selbstscannen im Lebensmitteleinzelhandel aufzudecken. In Supermärkten kommen vermehrt sogenannte Selbstscanvorrichtungen zum Einsatz, bei denen Kunden beispielsweise mit dem eigenen Smartphone und einer supermarkteigenen App die Produkte einscannen und direkt in den Einkaufswagen legen. So wird der Weg über eine lange Kassenschlange umgangen. Untersuchungen haben aber gezeigt, dass es bei 5% der Vorgänge zu Ungereimtheiten kommt. Die Ursache, ob aufgrund von bewusstem Betrug oder von Fehlern in der Smartphone-App, ist allerdings nicht bekannt. Die Aufgabe bestand darin, einen Algorithmus zu entwickeln, der auf Basis von anonymisierten Einkaufsdaten frühzeitig erkennt, ob ein sogenannter „Fraud“ vorliegt oder nicht. Unter dem Begriff "Fraud" werden jegliche Formen von Ungereimtheiten zusammengefasst - sei es bewusster Betrug oder eben nur ein Systemfehler. 
 
-### Metrik
+## Metrik
 
 Für die Evaluation wurde eine spezielle Konfusions Matrix beritgestellt, mit der die eingereichten Ergebnisse evaluiert werden.
 
@@ -49,30 +51,30 @@ Für die Evaluation wurde eine spezielle Konfusions Matrix beritgestellt, mit de
 
 Der Einzelhändler geht davon aus, dass ihm aufgrund eines Frauds im Schnitt 5 Euro verloren gehen. Decken wir diesen auf, so erhält er die 5 Euro (+5€). Wird der Betrug nicht erkannt sind die 5 Euro verloren (-5€). Wird ein treuer und aufrichtiger Kunde beschuldigt betrogen zu haben, so ist die Wahrscheinlichkeit groß den Kunden zu verlieren. In diesem Fall gehen dem Händer deswegen 25 Euro verloren.
 
-### Umsetzung
+## Umsetzung
 
-#### Pandas
+### Pandas
 
 Das Projekt wurde mithilfe der Programmiersprache Python umgesetzt. Dabei wurden für die Datenhaltung sowie explorative Datenanalyse das Framework [Pandas](https://pandas.pydata.org/) durchgeführt. Diese ermöglicht einen einfacher Umgang mit dem Datenset, welches dazu in den RAM geladen wird. Es stellt neben einfachen Visualiesierung- auch Datenvorverabeitungs- und Aggregationsmethoden zur Verfügung. Pandas ist das dominierende Framework im Python Data Science Umfeld.
 
-#### Scikit-Learn
+### Scikit-Learn
 
 Für die Umsetzung der Basisklassifikatoren (Siehe Kapitel [Models](#Models)) wurde die Bibliothek [Scikit-Learn](https://scikit-learn.org/stable/) benutzt. Diese stellt viele Implementierungen heutiger gängigiger Algorithmen bereit und achtet dabei besonders auf ein effizientes Ressourcenmanagment. So ermöglichen viele der angebotenen Schnittstellen ein parallelisierbares Training der Klassifikatoren.
 
-#### Keras
+### Keras
 
 [Keras](https://keras.io/) ist eine HighLevel API für Tensorflow, mit welcher neuronale Netze mithilfer einzelner Bausteine erzeugt werden können. In den ersten Versuchen wurde auch Deep Learning Methoden getestet, diese wurden jedoch auch bald schon wieder aufgrund mangelnder Performance verworfen. Wie im Kapitel [Modelle](#Models) näher erläutert wurde Keras dazu genutzt um ein Shallow Neural Net zu implementieren.
 
-#### Seaborn
+### Seaborn
 
 [Seaborn](https://seaborn.pydata.org/) ist eine Python Bibliothek die die weit verbreitete[ Matplotlib](https://matplotlib.org/) um einige nützliche Funktionen erweitert wenn mit Dataframes statt [Numpy-Arrays](https://www.numpy.org) gearbeitet wird. Es können trotzdem alle Grundfunktionalitäten der Matplotlib verwendet werden.
 
-## Datenset
+# Datenset
 
 Für die Bearbeitung des Datensets standen 1879 annotierte Trainingssamples sowie 498.121 nicht annotierten Testsamples zur Verfügung ein Trainings- und ein Testdatenset zur Verfügung.
 Für die spätere Vewenundung des Datensets mit verschiedenen Klassifikatoren wurden die Daten zusätzlich in einer skalierten Version abgespeichert. Skaliert wurde mithilfe des [Standard Scalers von Scikit-Learn](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html) anhand des Mittelwerts und der Varianz.
 
-## Ablauf
+# Ablauf
 Dieses Kapitel soll eine grobe übersicht über den Ablauf, vom Feature Engineering bis hin zum fertigen Klassifikator geben. Für Details sollte ein Blick in das jeweilige Kapitel geworfen werden. Am Ende des Kapitels ist ein Diagramm abegbildet, das den Ablauf des Findens des finalen Klassifikators visualisiert.
 
 1. Testen verschiedener Standardklassifikatoren
@@ -108,7 +110,7 @@ Dieses Kapitel soll eine grobe übersicht über den Ablauf, vom Feature Engineer
 ![Ablauf des Finalen Klassifikators](images/../notebooks/diagram.svg)
 
 
-### Features
+## Features
 
 Die Samples des Trainingsdatensets enthalten die im folgenden azfgezählten Features. Im Testdatenset fehlt die Zielvariable *fraud*.
 
@@ -124,11 +126,11 @@ Die Samples des Trainingsdatensets enthalten die im folgenden azfgezählten Feat
 |    valuePerSecond              |    Average total value of scanned products   per second                                         |    Positive decimal number                                      |
 |    lineItemVoidsPerPosition    |    Average number of item voids per total   number of all scanned and not cancelled products    |    Positive decimal number                                      |
 |    fraud                       |    Classification as fraud (1) or not   fraud (0)                                               |    {0,1}                                                        |
-### Trainings- Validierungs und Testdaten
+## Trainings- Validierungs und Testdaten
 
 Über die Dauer des Data Mining Cups hinweg wurden verschiedene Varianten des Datensets verwendet. Für das Trainieren der Klassifikatoren und dem Messen der Performance wurde ausschließlich auf das bereitgestellte Trainingsset mit 1879 Samples verwendet. Das Testset kam lediglich beim Trainieren eines [Semi-Supervised Learning Ansatzes](#semi-supervised-learning) zum Einsatz. Im frühen Zustand wurde mit einem einfachen Trainings/Validierungs Split mit einem Verhältnis 80/20  gearbeitet. Mithilfe von diesem wurden die Baselineklassifikatoren gewählt. Später zeigten Tests, dass das Ergebnis des Klassifikators extrem vom jeweiligen Trainings/Validierungs Split abhängt. Aus diesem Grund wurden zukünftige Versuche mithilfe eine 5-fold Cross Validation Tests durchgeführt. Aufgrund der Varianz des DMC Scores gegenüber der Anzahl der verwendeten Samples musste gewährleistet werden, dass wir hier ebenfalls eine 80/20 Verteilung beibehalten, sodass die Ergebnisse vom festen Train/Val Split weiter beibehalten werden können. 
 Bei der Ermittlung der Performance eines Semi-Supervised Ansatzes im späteren teil wurde das Datenset fest in Trainings- und Testdaten gesplittet. Diese Testdaten dienten zur Validierung und wurden zu keinem Zeitpunkt für ein Training des Semi-Supervised Ansatzes verwendet. Die Klassifikatoren selbst wurden dann mithilfe eines Cross-Validation Ansatzes auf dem Trainingsset trainiert. Nur so konnten vergleichbaren Ergebnisse garantiert werden.
-## Feature Engineering
+# Feature Engineering
 
 Um einen ersten groben Überblick zu erhalten wurden das Trainings- und das Testdatenset in Form eines [`Pandas.Dataframe`](https://pandas.pydata.org/pandas-docs/version/0.23.4/generated/pandas.DataFrame.html) eingelesen.
 
@@ -164,22 +166,22 @@ Die Funktion `Dataframe.describe()` liefert für das neue Feature den folgenden 
 
 Das neue Feature nimmt also diskrete Werte im Intervall [1,30] an und sind einigermaßen gleichverteilt.
 
-### Validieren eines neuen Merkmals
+## Validieren eines neuen Merkmals
 
 Um ein neues Merkmal zu validieren wurden mehrere Routinen durchgeführt, die sicherstellen, dass dieses Merkmal auch tatsächlich eine Verbesserung herbeiführt.
 
-#### Verteilungs Plots und Korrelation zwischen Zielvariable und neuem Feature
+### Verteilungs Plots und Korrelation zwischen Zielvariable und neuem Feature
 Viele der State-of-the-Art Klassifikatoren arbeiten direkt oder indirekt mit der Verteilung einer Variable. Ist eine Verteilung für eines Merkmals für unterschiedliche Werte der zu vorhersagenden Variable sehr unterschiedlich, so kann dies ein Indikator für eine hohe Trennungswirksamkeit sein. Die neu gefundene Variable *totalScannedLineItems* weist unter Berücksichtigungd des Features *fraud* beispielsweise eine Verteilung wie in der folgenden Grafik dargestellt auf. Ein weniger trennungswirksames Merkmal wie *grandTotal* weist sowohl für Frauds als auch für Non-Frauds eine sehr ähnliche Verteilung auf.
 ![Verteilung des Merkmals *totalScannedLineItems*](images/totalScanned_grandTotal.svg) <br>
 <sub>Abb. X: Links: Verteilung des Merkmals *grandTotal* Rechts: Verteilung des Merkmals *grandTotal* </sub>
 
 
-#### Besonderheiten
+### Besonderheiten
 
 Je weiter das Projekt fortgeschritten war, fiel auf, dass wir es hier mit einem extrem variablen Datenset zu tun haben. Dies trat besonders bei den Cross-Validation Tests zum vorschein. Eine 5-fold CV führte bei 10 Ausführungen mit "Shuffle" zu 10 teilweise sehr unterschiedlichen Ergebnissen. So konnten zwar während der Hyperparametersuche immer wieder DMC-Scores von 60,70 oder sogar 90 beobachtet werden, jedoch war dies nur auf eine "günstige" Konstellation der Trainings- und Validierungsdaten zurückzuführen. Diese hohe Varianz in den Trainingsdaten bereitete so große Schwierigkeiten, dass entschieden wurde nicht den Klassifikator mit dem besten Ergebnis auf einzelne Score-Werte zu suchen, sondern mithilfe eigens entwickelter Validierungsfunktionen den robustesten Klassifikator zu wählen.
 
 
-## Modelle
+# Modelle
 Zu Beginn des Wettbewebs wurden verschiedene Klassifikatoren aus der ML Bibliothek "Scikit-Learn" auf das unpräparierte Datenset angewandt. Hierbei hoben sich bereits zwei Klassifikatoren deutlich von den anderen ab. AdaBoost (15 DMC Score) und eine lineare Support Vector Machine (30 DMC Score). Das Verwenden des XGBoost Klassifikators, welcher im Kern die gleiche Funktionalität wie der AdaBoost besitzt, brachte eine weitere Verbesserung um 25 Punkte, auf 40 Punkte im DMC Score.
 
 | Klassifikator          | DMC-Score |
@@ -196,12 +198,12 @@ Zu Beginn des Wettbewebs wurden verschiedene Klassifikatoren aus der ML Biblioth
 | **XGBoost** | **40** |
 
 
-### Baseline
+## Baseline
 
 Bereits in einem frühen Stadium des Projekts ist es wichtig, sich für einen oder mehrere Baselineklassifikatoren zu entscheiden. Diese dienen während des gesamten Projekts als Indikator für gute oder schlechte Entscheidungen hinsichtlich neuer Ergebnisse. Es gilt jedoch zu beachten, dass diese Klassifikatoren bei Bedarf jederzeit durch bessere erstzt werden können. Beim Data Mining Cup haben wir  uns für 2 Basisklassifikatoren entschieden (siehe Einleitung [Modelle](#modelle)), da diese alle anderen getesteten Klassifikatoren mit großem Abstand übertroffen haben (Siehe [Baseline](#Baseline)).
 Wird im Laufe des Wettbewerns ein neues Feature entwickelt, muss dies also mit allen Baselines und gegebenfalls auch mit anderen Klassifikatoren getestet werden, indem eine Instanz des Klassifikators mit Daten inklusive den neuen Features, und eine Instanz ohne das neue Feature trainiert wird. Liefert der Klassifikator mit dem neuen Feature bessere Ergebnisse als der ohne das neue Feature, so spricht dies dafür, dass ein weitere trennungswirksames Merkmal gefunden wurde, dass zur Verbesserung der Resultate beitragen kann.
 
-#### XGBoost Klassifikator
+### XGBoost Klassifikator
 Als einer der beiden Baselineklassifikatoren wurde der Gradienten Boosting Algorithmus [XGBoost](!https://xgboost.readthedocs.io/en/latest/) gewählt. Dieses ist in der gleichnamigen Pythonbibliothek enthalten und zeichnet sich neben seiner enorm effizienten Programmierung auch durch eine hohe Modifizierbarkeit aus. Neben dem eigenen Datenformat *DMatrix* können auch Numpy Arrays verwendet werden. Als Klassifikator kam der [XGBClassifier](!https://xgboost.readthedocs.io/en/latest/python/python_api.html#xgboost.XGBClassifier) zum Einsatz. Verschiedene Tests zeigten, dass folgende Parameter für den Fall des Data Mining Cup relevant sind:
 ``` python
 params = {
@@ -265,11 +267,11 @@ XGBClassifier(base_score=0.5, booster='gbtree', colsample_bylevel=1,
 
 Die Hyperparametersuche führte zu minimal besseren Klassifikationsergebnissen, sodass im Mittel ein DMC Score von **42.0** erreicht werden konnte.
 
-#### Die Kostenfunktion
+### Die Kostenfunktion
 
 Bei Gradientenboostingverfahren wird für die Berechnung des Gradienten eine 2-fach stetig differenzierbare mathematische Funktion benötigt (positive Definitheit). In vielen Fällen ist es möglich diese über eine Approximation zu erhalten. Aufgrund des Zeitmangels war es uns aber nicht möglich unsere Kostenfunktion (vorgestellt im Abschnitt [Metrik](#metrik)) in eine 2 fach stetig differenzierbare zu wandeln. Da die XGBoost Bibliothek aber als Kostenfunktion eine $F_\beta$-Funktion anbietet und sich über diese eine *imbalance* zwischen Precision und Recall ausrücken lässt, wurde über ein iteratives Verfahren das $\beta$ gesucht, für das die $F_\beta$-Funktion die größte Korellation mit dem DMC-Score aus dem Kapitel [Metrik](#metrik) aufweist. $\beta = 0.5172413$ weist die größte Korrelation mit dem DMC Score auf.
 
-#### Lineare Support Vector Machine
+### Lineare Support Vector Machine
 Wie erste Tests zeigten, performt eine Support Vector Machine mit linearem Kernel besonders gut auf dem Datensatz des Data Mining Cups. Aus diesem Grund wurde die Scikit-Learn Implementierung des Support Vector Classifiers [*sklearn.svm.SVC*](!https://scikit-learn.org/stable/modules/generated/sklearn.svm.SVC.html#sklearn-svm-svc) verwendet. Hierbei wurde als Kernel der lineare Kernel. Statt der bereits vorhandenen Klasse *linearSVC* wurde auf die Basisimplementierung `SVC(kernel='linear')` zurückgegriffen, da diese mehe möglichkeiten hinsichtlich Paralellisierung sowie Verwendung modifizierter Funktionen bietet. Da Support Vector Machines deutlich besser auf skalierten Daten arbeiten, wurde das ursprüngliche Datenset anhand des Mittelwerts und der Varianz skaliert. Dass SVM skalierungssensitiv sind, ist besonders gut an folgendem Beispiel zu erkennen:
 
 ![Skalierungssensitive SVM](images/unscaled_scaled_SVM.png)<br>
@@ -328,7 +330,7 @@ SVC(C=11.439334564226868, cache_size=8000, class_weight=None, coef0=0.0,
     shrinking=False, tol=0.08370638742373739, verbose=0)
 ```
 
-### Boosting durch Kombinieren der beiden Baseline Klassifikatoren
+## Boosting durch Kombinieren der beiden Baseline Klassifikatoren
 
 Im Vergleich zu den in [Modelle](#modelle) erreichten Werten bringen sowohl SVM als auch XGBoost passable Ergebnisse. Ein näheres Betrachten der *False Positives*, welche mit einem Gewicht von -25 in den DMC Score einfließen, zeigt, dass SVM und XGB unterschiedliche Fehler machen. Basierend auf dieser Beoabachtung soll ein neuer Klassifikator aus einer Kombination der beiden Basisklassifikatoren entscheiden. Diese Technik ist auch als [Boosting](!https://en.wikipedia.org/wiki/Boosting_(machine_learning)) bekannt. Für diesen Zweck wurde ein One-Layer neuronales Netz verwendet.
 
@@ -368,7 +370,7 @@ Als Optimierer wurde ein *Adam-Optimierer* und als Kostenfunktion die *binary cr
 
 Um ausreichend Trainingsdaten für das neuronale Netz zu haben sollten die beiden Basisklassifikatoren miithilfe einer cross validation Funktion den annotierten Trainingsdatensatz vorhersagen. Aufgrund der Tatsache, dass das Netz lediglich die Ergebnisse und dessen Wahrscheinlichkeit von SVM und XGBoost als Eingabe erhält, nicht aber die eigentlichen Datensamples, ist diese Vorgehensweise aus unserer Sicht unbedenklich.
 
-### Semi-Supervised Learning (SSL)
+## Semi-Supervised Learning (SSL)
 
 Semi-Supervised Learning ist ein Teilgebiet des maschinellen Lernens, bei dem Versucht wird supervised und unsupervised Ansätze zu kombinieren. Dabei können sowohl unsupervised Ansätze durch supervised Ansätze ergänzt werden, als auch umgekehrt. Diese Techniken  können besonders bei Problemen helfen, bei denen extrem unbalancierte Datensets vorhanden sind oder, wie im Fall des Data Mining Cups, nur sehr wenige Trainingsdaten vorhanden sind.
 
@@ -385,7 +387,7 @@ Es gilt aber zu beachten, dass die hinzugezogenen Testdaten nur einen Anteil zwi
 
 Auf den ersten Blick konnte das SSL für keine große Verbesserung des DMC Scores auf unserem separierten Testset sorgen. Wir konnten aber mithilfe der selbst geschriebenen Cross Validation Funktion zeigen, dass sich die Robustheit gegnüber Ausreißern erhöht. Dies ist vorallem deshalb wichtig, weil uns False Positives, also Fälle die Non-Fraud sind aber als Fraud klassifiziert werden, stärker bestraft werden als uns True Positives "belohnen".  
 
-### Finaler Klassifikator
+## Finaler Klassifikator
 Für den finalen Klassifikator kommen nun alle bisher beschriebenen Komponenten und Aspekte zum Einsatz. Insbesondere kommt der Aspekt zum Tragen, dass es keine Frauds mit *TrustLevel* > 2 gibt. Der PseudoCode für den Klassifikator ist im folgenden zu sehen, gefolgt von einer grafischen Darstellung dessen.
 
 ``` python
@@ -408,15 +410,26 @@ else:
 
 Im Vergleich zu den verwendeten Basisklassifikatoren konnte keine große Verbesserung des DMC Scores erreicht werden. Die beim Transfer Learning beobachteten hohen Schwankungen des DMC Scores konnte aber verringert werden. Dies ist ein Indikator für ein robusteres Modell und auf jedenfall eine wichtige Eigenschaft eines guten Klassifikators.
 
-## Weitere Verbesserungsmöglichkeiten
+# Weitere Verbesserungsmöglichkeiten
 
 Drr enorme Zeitdruck hatte leider keinen Spielraum für das Ausprobieren mehrerer Ansätze gelassen. Ein paar Ideen, die noch aufkamen sind in diesem Kapitel kurz erläutert.
 
-### Retraining des Boosting netzes während dem Semisupervised Learning
+## Retraining des Boosting netzes während dem Semisupervised Learning
 
 Mithilfe eines On-Layer Netzes konnte die Klassifikation in Fraud/Non-Fraud noch einmal hinsichtlich der Robustheit und der Genauigkeit verbessert werden. Aufgrund der Tatsache, dass die Scores der anderen Teams nur minimal besser waren, könnte ein Einbetten eines Trainings des neuronalen Netzes in den Semi-Supervised Ansatz zu einer minimalen Verbesserung führen. Dies wäre auch deshalb wichtig, da sich die zwei Basisklassifikatoren durch das Semisupervised Learning verändert haben.
 
-### Automatisches Feature Engineering (Mehrere Kombinationen verschiedener Features)
+## Automatisches Feature Engineering (Mehrere Kombinationen verschiedener Features)
 
 Viele der bei der Preisverleihung anwesenden Teams benutzen statt dem manuellen Feature Engineering, Frameworks zur automatischen Feature Generierung. Da wir selbst leider diesen Ansatz nicht ausprobieren konnten, wäre dies eine Möglichkeit, unsere Prediction weiter zu verbessern. Speziell weil sich gezeigt hat, dass ein neu erarbeitetes Feature (totalScannedLineItems) sich als sehr Trennungswirksam herausstellte.
 
+# Das Repository
+
+Das Repository ist unterteilt in mehrere Ordner:
+
+- **data**: enthält sämtliche Daten die für das Training der Klassifikatoren sowie des MLP verwendet wurden. Er enthält außerdem die Geichte sowie eine in Json-Form definierte Architektur des MLP
+
+- **notebooks** : Implementierung der Verfahren welche für die finale Abgabe verwendet wurden oder ausschlaggebend für die Entscheidungsfindung waren.
+- **notebooks/tmp_notebooks**: Code welcher entweder bereits durch Beispiele im Überordner bereits repräsentiert wurde(Parameter Search) oder welcher nicht direkt zur finalen Vorhersage beigetragen hat.
+
+- **docs**: Enthält Beschreibungen der Daten und der Aufgabe sowie das Poster, welches im Rahmen der Preiverleihung vorgestellt wurde.
+- **scripts**: Altlast Ordner. Das neue *utils*-Skript befindet sicher unter *notebooks*
