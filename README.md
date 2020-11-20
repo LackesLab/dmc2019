@@ -48,10 +48,10 @@ Die Jubiläumsausgabe des internationalen Studentenwettbewerbs hatte zum Ziel, B
 
 Für die Evaluation wurde eine spezielle Konfusions-Matrix bereitgestellt, mit der die eingereichten Ergebnisse evaluiert werden:
 
-<table>
+<table margin-left="auto" margin-right="auto">
   <tr>
-    <th colspan="2" rowspan="2"/>
-    <th colspan="2"><b>Actual Value</b></th>
+    <td colspan="2" rowspan="2"/>
+    <td colspan="2" align="center" vertical-align="center"><b>Actual Value</b></th>
   </tr>
   <tr>
     <td align="center" vertical-align="center">No Fraud</td>
@@ -60,13 +60,13 @@ Für die Evaluation wurde eine spezielle Konfusions-Matrix bereitgestellt, mit d
   <tr>
     <td rowspan="2" align="left" vertical-align="center"><b>Predictions</b></td>
     <td align="center" vertical-align="center">No Fraud</td>
-    <td align="center" vertical-align="center">  &zwnj; &zwnj; &zwnj; &zwnj;  0.0 €</td>
+    <td align="center" vertical-align="center">&zwnj; &zwnj; &zwnj; &zwnj; &zwnj; 0.0 €</td>
     <td align="center" vertical-align="center"> - 5.0 €</td>
   </tr>
   <tr>
     <td align="right" vertical-align="center">Fraud</td>
     <td align="center" vertical-align="center"> - 25.0 €</td>
-    <td align="center" vertical-align="center">&zwnj; &zwnj; &zwnj; 5.0 € </td>
+    <td align="center" vertical-align="center">&zwnj; &zwnj; &zwnj; 5.0 €</td>
   </tr>
 </table>
 
